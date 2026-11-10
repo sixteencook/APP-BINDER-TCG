@@ -27,6 +27,8 @@ describe("produits scellés TCGGO", () => {
     expect(mapTcggoProduct({ id: 2, name: "ETB", prices: { cardmarket: { lowest: null, "30d_average": 45 } } })?.price).toBe(45);
     expect(mapTcggoProduct({ id: 3, name: "ETB", prices: { cardmarket: { lowest: null, "7d_average": 41, "30d_average": 45 } } })?.price).toBe(41);
     // moyenne 7 j aberrante (peu de ventes) : le plus bas en vente l'emporte
+    // premier prix vendeur France prioritaire sur le plus bas toutes origines
+    expect(mapTcggoProduct({ id: 6, name: "ETB", prices: { cardmarket: { lowest: 90, lowest_FR: 110, "7d_average": 360 } } })?.price).toBe(110);
     expect(mapTcggoProduct({ id: 5, name: "ETB PC", prices: { cardmarket: { lowest: 130, "7d_average": 399 } } })?.price).toBe(130);
     expect(mapTcggoProduct({ name: "sans id" })).toBeNull();
     expect(mapTcggoProduct({ id: 4, name: "http image", image: "http://insecure.png" })?.image).toBeNull();

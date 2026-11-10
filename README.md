@@ -7,7 +7,7 @@ PWA mobile-first : un **binder virtuel** (grille 4×4 pensée pour le mode paysa
 - Binder paginé : grilles 3×3, 4×3, 3×4, 4×4 ; cartes dimensionnées pour tenir dans l'écran ; barre latérale « à placer » (bandeau en portrait) ; toucher une carte puis un emplacement, glisser-déposer sur ordinateur, balayage pour tourner les pages ; remplissage automatique par extension/numéro ; plusieurs binders.
 - Prix affichés en bas à droite de chaque carte (désactivable).
 - Recherchées : prix cible, alerte « objectif atteint », coût total, bouton « Je l'ai eue ».
-- Scellés : possédés / recherchés, valeur, coût d'achat, plus-value. Recherche de produits via l'API TCGGO (`/pokemon/products/search`) : image officielle et prix Cardmarket (le plus bas en vente, sinon moyenne 7 j, sinon 30 j — les moyennes sont faussées sur les produits rares), actualisables en un clic. Saisie manuelle toujours possible pour les produits introuvables.
+- Scellés : possédés / recherchés, valeur, coût d'achat, plus-value. Recherche de produits via l'API TCGGO (`/pokemon/products/search`) : image officielle et prix Cardmarket (le plus bas vendeur France (`lowest_FR`), sinon le plus bas toutes origines, sinon moyenne 7 j, sinon 30 j — les moyennes sont faussées sur les produits rares), actualisables en un clic. Saisie manuelle toujours possible pour les produits introuvables.
 - Export / import JSON, migration automatique du binder v0.1, cache de prix 4 h côté appareil, images de cartes mises en cache hors ligne, vignettes légères.
 
 ## Stack

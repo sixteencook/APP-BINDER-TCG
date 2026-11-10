@@ -11,6 +11,7 @@ type TcggoProduct = {
   prices?: {
     cardmarket?: {
       lowest?: number | null;
+      lowest_FR?: number | null;
       "7d_average"?: number | null;
       "30d_average"?: number | null;
     };
@@ -30,6 +31,7 @@ export function mapTcggoProduct(product: TcggoProduct, updatedAt = new Date().to
   const id = Number(product.id);
   if (!Number.isInteger(id) || id <= 0 || !product.name) return null;
   const market = product.prices?.cardmarket;
+  const lowestFR = nullableNumber(market?.lowest_FR);
   const lowest = nullableNumber(market?.lowest);
   const avg7 = nullableNumber(market?.["7d_average"]);
   const avg30 = nullableNumber(market?.["30d_average"]);
@@ -38,9 +40,9 @@ export function mapTcggoProduct(product: TcggoProduct, updatedAt = new Date().to
     name: String(product.name).slice(0, 120),
     image: typeof product.image === "string" && product.image.startsWith("https://") ? product.image : null,
     setName: typeof product.episode?.name === "string" ? product.episode.name.slice(0, 120) : null,
-    // Le plus bas en vente = prix réellement payable ; les moyennes 7/30 j sont faussées sur les produits rares (2-3 ventes).
-    price: lowest ?? avg7 ?? avg30,
-    lowest,
+    // Premier prix vendeur France (lowest_FR), sinon le plus bas toutes origines = prix réellement payable ; les moyennes 7/30 j sont faussées sur les produits rares (2-3 ventes).
+    price: lowestFR ?? lowest ?? avg7 ?? avg30,
+    lowest: lowestFR ?? lowest,
     avg7,
     avg30,
     updatedAt,
