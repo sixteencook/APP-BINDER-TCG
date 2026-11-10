@@ -1,7 +1,10 @@
-import type { Card, CardCatalogProvider } from "@/lib/domain/types";
+import type { Card, CardCatalogProvider, SetSummary } from "@/lib/domain/types";
 
 const API_ROOT = "https://api.tcgdex.net/v2/fr";
 const REQUEST_TIMEOUT_MS = 12_000;
+const DETAIL_TTL_MS = 24 * 60 * 60 * 1000;
+const DETAIL_CONCURRENCY = 8;
+const MAX_CACHED_DETAILS = 600;
 
 type Brief = { id: string; localId: string; name: string; image?: string };
 type Detail = Brief & {
@@ -13,6 +16,24 @@ type Detail = Brief & {
     serie?: { name?: string };
   };
 };
+
+// Cache mémoire par instance serveur : les fiches TCGdex changent très rarement.
+const detailCache = new Map<string, { expires: number; value: Detail }>();
+const searchCache = new Map<string, { expires: number; value: Card[] }>();
+let setsCache: { expires: number; value: SetSummary[] } | null = null;
+
+function remember<T>(cache: Map<string, { expires: number; value: T }>, key: string, value: T, ttl: number) {
+  if (cache.size >= MAX_CACHED_DETAILS) cache.delete(cache.keys().next().value as string);
+  cache.set(key, { expires: Date.now() + ttl, value });
+}
+
+async function getDetail(id: string): Promise<Detail> {
+  const hit = detailCache.get(id);
+  if (hit && hit.expires > Date.now()) return hit.value;
+  const value = await getJson<Detail>(`${API_ROOT}/cards/${encodeURIComponent(id)}`);
+  remember(detailCache, id, value, DETAIL_TTL_MS);
+  return value;
+}
 
 function normalize(value: string) {
   return value
@@ -52,6 +73,33 @@ async function mapWithConcurrency<T, R>(values: T[], limit: number, mapper: (val
 
 export class TCGdexCatalogProvider implements CardCatalogProvider {
   async search(query: string): Promise<Card[]> {
+    const key = normalize(query);
+    const cached = searchCache.get(key);
+    if (cached && cached.expires > Date.now()) return cached.value;
+    const cards = await this.searchUncached(query);
+    remember(searchCache, key, cards, 60 * 60 * 1000);
+    return cards;
+  }
+
+  /** Liste des extensions (avec logo) : sert à rattacher un produit scellé à une extension. */
+  async listSets(): Promise<SetSummary[]> {
+    if (setsCache && setsCache.expires > Date.now()) return setsCache.value;
+    type RawSet = { id: string; name: string; logo?: string; cardCount?: { official?: number; total?: number } };
+    const raw = await getJson<RawSet[]>(`${API_ROOT}/sets`);
+    const value = raw
+      .filter((set) => set.id && set.name)
+      .map((set) => ({
+        id: set.id,
+        name: set.name,
+        logo: set.logo ? `${set.logo}.webp` : null,
+        cardCount: set.cardCount?.official ?? set.cardCount?.total ?? null,
+      }))
+      .reverse(); // TCGdex liste du plus ancien au plus récent : on affiche les nouveautés en premier.
+    setsCache = { expires: Date.now() + DETAIL_TTL_MS, value };
+    return value;
+  }
+
+  private async searchUncached(query: string): Promise<Card[]> {
     const parsed = parseCardQuery(query);
     if (!parsed.name && !parsed.localId) return [];
     const searchName = (parsed.name.replace(/\s+ex$/i, "-ex").split(/\s+/).slice(0, 3).join(" ") || parsed.localId || "");
@@ -67,9 +115,7 @@ export class TCGdexCatalogProvider implements CardCatalogProvider {
       briefs = briefs.filter((card) => card.localId.replace(/^0+/, "").toLowerCase() === wanted);
     }
 
-    const details = await mapWithConcurrency(briefs.slice(0, 24), 4, (card) =>
-      getJson<Detail>(`${API_ROOT}/cards/${encodeURIComponent(card.id)}`),
-    );
+    const details = await mapWithConcurrency(briefs.slice(0, 24), DETAIL_CONCURRENCY, (card) => getDetail(card.id));
 
     return details
       .filter((card) => {

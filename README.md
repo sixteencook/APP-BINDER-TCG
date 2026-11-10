@@ -1,6 +1,14 @@
-# TCG Binder Tracker v0.1
+# TCG Binder v0.2
 
-Prototype PWA mobile-first pour rechercher précisément des cartes Pokémon TCG françaises, consulter des métriques Cardmarket et conserver un binder local avec une valeur estimée.
+PWA mobile-first : un **binder virtuel** (grille 4×4 pensée pour le mode paysage) où l'on place ses cartes, avec suivi des prix Cardmarket, une liste de **cartes recherchées** et un rayon de **produits scellés** (display, ETB, ETB Pokémon Center, coffrets…).
+
+## Nouveautés v0.2
+
+- Binder paginé : grilles 3×3, 4×3, 3×4, 4×4 ; cartes dimensionnées pour tenir dans l'écran ; barre latérale « à placer » (bandeau en portrait) ; toucher une carte puis un emplacement, glisser-déposer sur ordinateur, balayage pour tourner les pages ; remplissage automatique par extension/numéro ; plusieurs binders.
+- Prix affichés en bas à droite de chaque carte (désactivable).
+- Recherchées : prix cible, alerte « objectif atteint », coût total, bouton « Je l'ai eue ».
+- Scellés : possédés / recherchés, valeur, coût d'achat, plus-value. **Les prix scellés sont saisis à la main** (aucune source de prix scellé n'est branchée) ; lien de recherche Cardmarket fourni.
+- Export / import JSON, migration automatique du binder v0.1, cache de prix 4 h côté appareil, images de cartes mises en cache hors ligne, vignettes légères.
 
 ## Stack
 
