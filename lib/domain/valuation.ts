@@ -2,7 +2,7 @@ import type { BinderItem, CardPriceData, SealedItem, WishItem } from "./types";
 
 export function calculateReferencePrice(price: CardPriceData | null): number | null {
   if (!price) return null;
-  return price.trend ?? price.avg7 ?? price.avg30 ?? price.lowest ?? null;
+  return price.lowest ?? price.trend ?? price.avg7 ?? price.avg30 ?? null;
 }
 
 export function calculateBinderTotal(items: BinderItem[]): {

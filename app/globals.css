@@ -315,3 +315,6 @@ input::placeholder, textarea::placeholder { color: #667394; }
 }
 
 .product-hits .hit-price small { font-weight: 600; font-size: 0.7rem; }
+
+.condition-picker { display: grid; gap: 6px; margin: 4px 0; }
+.condition-picker .segmented button { padding-inline: 6px; font-size: 0.82rem; }

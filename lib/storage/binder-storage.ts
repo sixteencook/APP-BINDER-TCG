@@ -1,6 +1,7 @@
 import { SEALED_TYPES } from "@/lib/domain/sealed";
 import { MAX_QUANTITY, emptyState } from "@/lib/domain/state";
 import type { AppState, Binder, BinderItem, CardPriceData, Placement, SealedItem, WishItem } from "@/lib/domain/types";
+import { applyCondition, parseCondition } from "@/lib/domain/condition";
 import { calculateReferencePrice } from "@/lib/domain/valuation";
 
 export interface AppStorage {
@@ -93,13 +94,14 @@ export function sanitizeState(raw: unknown): AppState | null {
     if (!card || seen.has(card.id) || !isRecord(entry)) continue;
     seen.add(card.id);
     const prices = parsePrice(entry.prices);
+    const condition = parseCondition(entry.condition);
     collection.push({
       ...card,
       language: "FR",
-      condition: "NM",
+      condition,
       quantity: clamp(entry.quantity, 1, MAX_QUANTITY, 1),
       prices,
-      referencePrice: calculateReferencePrice(prices),
+      referencePrice: applyCondition(calculateReferencePrice(prices), condition),
       lastPriceUpdate: prices?.updatedAt ?? null,
       purchasePrice: money(entry.purchasePrice),
       addedAt: str(entry.addedAt, 40) ?? undefined,

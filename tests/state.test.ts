@@ -9,6 +9,7 @@ import {
   unplacedCount,
 } from "@/lib/domain/state";
 import type { AppState, Card, CardPriceData } from "@/lib/domain/types";
+import { applyCondition, parseCondition } from "@/lib/domain/condition";
 import { calculateSealedTotals, calculateWishlistTotal, isTargetReached } from "@/lib/domain/valuation";
 import { migrateLegacy, parseBackup, sanitizeState, serializeBackup } from "@/lib/storage/binder-storage";
 
@@ -26,7 +27,7 @@ const card = (n: number, extensionId = "sv01"): Card => ({
 });
 
 const price = (trend: number): CardPriceData => ({
-  currency: "EUR", language: "FR", condition: "NM", lowest: trend - 1, trend, avg7: null, avg30: null,
+  currency: "EUR", language: "FR", condition: "NM", lowest: trend, trend, avg7: null, avg30: null,
   updatedAt: "2026-11-10T08:00:00.000Z", source: "TCGGO / Cardmarket", providerProductId: "1", fallbackImage: null,
 });
 
@@ -242,5 +243,31 @@ describe("persistance", () => {
     expect(dirty?.collection[0].quantity).toBe(99);
     expect(dirty?.collection[0].image).toBeNull();
     expect(dirty?.placements).toHaveLength(1);
+  });
+});
+
+describe("état de la carte (condition)", () => {
+  it("ajoute une carte avec son état et ajuste la valeur estimée", () => {
+    const base = price(100);
+    const state = run(emptyState(), { type: "collection/add", card: card(1), price: { ...base, lowest: 100, trend: null }, condition: "LP" });
+    expect(state.collection[0].condition).toBe("LP");
+    expect(state.collection[0].referencePrice).toBe(60);
+  });
+
+  it("recalcule la valeur quand on change l'état, et garde l'état à l'actualisation du prix", () => {
+    const base = { ...price(100), lowest: 100, trend: null };
+    let state = run(emptyState(), { type: "collection/add", card: card(1), price: base });
+    expect(state.collection[0].referencePrice).toBe(100);
+    state = run(state, { type: "collection/condition", id: "sv01-001", condition: "EX" });
+    expect(state.collection[0].referencePrice).toBe(85);
+    state = run(state, { type: "price/set", kind: "collection", id: "sv01-001", price: { ...base, lowest: 200 } });
+    expect(state.collection[0]).toMatchObject({ condition: "EX", referencePrice: 170 });
+  });
+
+  it("applyCondition / parseCondition : null conservé, état inconnu = NM", () => {
+    expect(applyCondition(null, "PO")).toBeNull();
+    expect(applyCondition(10, "PO")).toBe(3);
+    expect(parseCondition("zzz")).toBe("NM");
+    expect(sanitizeState({ version: 2, collection: [{ ...card(1), condition: "GD", prices: { ...price(10), lowest: 10, trend: null } }] })?.collection[0]).toMatchObject({ condition: "GD", referencePrice: 7 });
   });
 });

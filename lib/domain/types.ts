@@ -1,5 +1,5 @@
 export type CardLanguage = "FR";
-export type CardCondition = "NM";
+export type CardCondition = "NM" | "EX" | "GD" | "LP" | "PL" | "PO";
 
 export interface Card {
   id: string;
@@ -17,7 +17,8 @@ export interface Card {
 export interface CardPriceData {
   currency: "EUR";
   language: CardLanguage;
-  condition: CardCondition;
+  /** Les prix TCGGO sont toujours en Near Mint ; l'état de la carte ajuste la valeur estimée. */
+  condition: "NM";
   lowest: number | null;
   trend: number | null;
   avg7: number | null;

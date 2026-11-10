@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { Minus, Plus, X } from "lucide-react";
-import type { Card, CardPriceData } from "@/lib/domain/types";
+import type { Card, CardCondition, CardPriceData } from "@/lib/domain/types";
+import { CONDITIONS, applyCondition, conditionFactor, conditionLabel } from "@/lib/domain/condition";
 import { calculateReferencePrice } from "@/lib/domain/valuation";
 import { imageSources } from "@/lib/images";
 import { money, moneyTag } from "@/lib/format";
@@ -44,7 +45,7 @@ export function PriceTag({ value, tone = "default", title }: { value: number | n
   );
 }
 
-export function PriceMetrics({ price }: { price: CardPriceData | null }) {
+export function PriceMetrics({ price, condition = "NM" }: { price: CardPriceData | null; condition?: CardCondition }) {
   const rows: [string, number | null][] = [
     ["Lowest FR NM", price?.lowest ?? null],
     ["Trend", price?.trend ?? null],
@@ -60,10 +61,30 @@ export function PriceMetrics({ price }: { price: CardPriceData | null }) {
         </div>
       ))}
       <div className="metrics-estimate">
-        <dt>Valeur estimée</dt>
-        <dd>{money(calculateReferencePrice(price))}</dd>
+        <dt>{condition === "NM" ? "Valeur estimée" : `Valeur estimée · ${condition} (≈ NM × ${Math.round(conditionFactor(condition) * 100)} %)`}</dt>
+        <dd>{money(applyCondition(calculateReferencePrice(price), condition))}</dd>
       </div>
     </dl>
+  );
+}
+
+/** Choix de l'état Cardmarket. Hors NM, la valeur est une estimation (TCGGO ne donne que le prix Near Mint). */
+export function ConditionPicker({ value, onChange }: { value: CardCondition; onChange: (value: CardCondition) => void }) {
+  return (
+    <div className="condition-picker">
+      <span className="row-label">État de la carte · {conditionLabel(value)}</span>
+      <Segmented
+        label="État de la carte"
+        value={value}
+        onChange={onChange}
+        options={CONDITIONS.map((condition) => ({ id: condition.id, label: condition.short }))}
+      />
+      {value !== "NM" && (
+        <p className="muted small">
+          Prix estimé : le premier prix FR Near Mint de Cardmarket × {Math.round(conditionFactor(value) * 100)} %. TCGGO ne fournit pas de prix par état.
+        </p>
+      )}
+    </div>
   );
 }
 

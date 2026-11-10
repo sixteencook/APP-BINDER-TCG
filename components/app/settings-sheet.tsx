@@ -88,7 +88,7 @@ export function SettingsSheet({ open, onClose }: { open: boolean; onClose: () =>
         </div>
 
         <p className="muted small">
-          Catalogue : TCGdex. Prix : TCGGO / Cardmarket (Lowest FR NM, moyennes 7 et 30 jours). Estimations indicatives, sans garantie de prix de vente.
+          Catalogue : TCGdex. Prix : TCGGO / Cardmarket (premier prix FR en Near Mint, moyennes 7 et 30 jours ; pour les autres états, estimation = prix NM × coefficient). Estimations indicatives, sans garantie de prix de vente.
         </p>
       </div>
     </Sheet>

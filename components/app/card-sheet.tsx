@@ -6,7 +6,7 @@ import { placedCount } from "@/lib/domain/state";
 import type { BinderItem } from "@/lib/domain/types";
 import { dateTime, money, signedMoney } from "@/lib/format";
 import { useApp } from "./app-context";
-import { CardImage, MoneyInput, PriceMetrics, Sheet, Stepper } from "./ui";
+import { CardImage, ConditionPicker, MoneyInput, PriceMetrics, Sheet, Stepper } from "./ui";
 
 /** Fiche d'une carte de la collection (depuis un emplacement ou la barre latérale). */
 export function CardSheet({ item, position, onClose, onMove }: { item: BinderItem | null; position: number | null; onClose: () => void; onMove?: (cardId: string) => void }) {
@@ -31,8 +31,9 @@ export function CardSheet({ item, position, onClose, onMove }: { item: BinderIte
               {item.localId}/{item.printedTotal ?? "?"}
               {item.rarity && <span className="rarity"> · {item.rarity}</span>}
             </p>
-            <PriceMetrics price={item.prices} />
-            <p className="muted small">Cardmarket · FR · Near Mint — actualisé {dateTime(item.lastPriceUpdate)}</p>
+            <PriceMetrics price={item.prices} condition={item.condition} />
+            <p className="muted small">Cardmarket · FR · prix Near Mint — actualisé {dateTime(item.lastPriceUpdate)}</p>
+            <ConditionPicker value={item.condition} onChange={(condition) => dispatch({ type: "collection/condition", id: item.id, condition })} />
 
             <div className="row">
               <span className="row-label">Quantité</span>

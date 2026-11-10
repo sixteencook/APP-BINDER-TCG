@@ -3,10 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { BookOpen, Heart, Library, Search } from "lucide-react";
-import type { Card, CardPriceData } from "@/lib/domain/types";
+import type { Card, CardCondition, CardPriceData } from "@/lib/domain/types";
 import { loadPrice } from "@/lib/storage/price-cache";
 import { useApp } from "./app-context";
-import { CardImage, PriceMetrics, Sheet } from "./ui";
+import { CardImage, ConditionPicker, PriceMetrics, Sheet } from "./ui";
 
 const RECENT_KEY = "tcg-binder-tracker:v2:recent-searches";
 
@@ -122,6 +122,7 @@ function CardDetailSheet({ card, onClose }: { card: Card; onClose: () => void })
   const [price, setPrice] = useState<CardPriceData | null>(null);
   const [loading, setLoading] = useState(true);
   const [problem, setProblem] = useState<string | null>(null);
+  const [condition, setCondition] = useState<CardCondition>("NM");
 
   useEffect(() => {
     let cancelled = false;
@@ -152,17 +153,18 @@ function CardDetailSheet({ card, onClose }: { card: Card; onClose: () => void })
             {card.localId}/{card.printedTotal ?? "?"}
             {card.rarity && <span className="rarity"> · {card.rarity}</span>}
           </p>
-          <h3 className="sub">Cardmarket — Français · Near Mint</h3>
-          {loading ? <div className="skeleton metrics-skeleton" aria-busy /> : <PriceMetrics price={price} />}
+          <h3 className="sub">Cardmarket — Français · prix Near Mint</h3>
+          {loading ? <div className="skeleton metrics-skeleton" aria-busy /> : <PriceMetrics price={price} condition={condition} />}
+          <ConditionPicker value={condition} onChange={setCondition} />
           {problem && <p className="notice small" role="status">{problem}</p>}
           <p className="muted small">Estimation indicative, sans garantie de prix de vente.</p>
           {ownedQty > 0 && <p className="ok-text">Déjà dans votre collection : ×{ownedQty}</p>}
 
           <div className="actions">
-            <button type="button" className="btn primary" onClick={() => { dispatch({ type: "collection/add", card, price, place: true }); toast("Carte ajoutée et placée dans le binder."); onClose(); setView("binder"); }}>
+            <button type="button" className="btn primary" onClick={() => { dispatch({ type: "collection/add", card, price, place: true, condition }); toast("Carte ajoutée et placée dans le binder."); onClose(); setView("binder"); }}>
               <BookOpen size={17} /> Ajouter au binder
             </button>
-            <button type="button" className="btn" onClick={() => { dispatch({ type: "collection/add", card, price }); toast("Carte ajoutée à « à placer »."); onClose(); }}>
+            <button type="button" className="btn" onClick={() => { dispatch({ type: "collection/add", card, price, condition }); toast("Carte ajoutée à « à placer »."); onClose(); }}>
               <Library size={17} /> Ajouter sans placer
             </button>
             <button type="button" className="btn" disabled={wished || ownedQty > 0} onClick={() => { dispatch({ type: "wish/add", card, price }); toast("Ajoutée aux cartes recherchées."); onClose(); }}>

@@ -3,11 +3,13 @@ import type {
   Binder,
   BinderItem,
   Card,
+  CardCondition,
   CardPriceData,
   Placement,
   SealedItem,
   WishItem,
 } from "./types";
+import { applyCondition } from "./condition";
 import { calculateReferencePrice } from "./valuation";
 
 export const MAX_QUANTITY = 99;
@@ -119,8 +121,9 @@ export function placedValueFor(state: AppState, binderId: string, size: number, 
 
 export type Action =
   | { type: "hydrate"; state: AppState }
-  | { type: "collection/add"; card: Card; price: CardPriceData | null; place?: boolean }
+  | { type: "collection/add"; card: Card; price: CardPriceData | null; place?: boolean; condition?: CardCondition }
   | { type: "collection/quantity"; id: string; quantity: number }
+  | { type: "collection/condition"; id: string; condition: CardCondition }
   | { type: "collection/remove"; id: string }
   | { type: "collection/purchase"; id: string; value: number | null }
   | { type: "price/set"; kind: "collection" | "wishlist"; id: string; price: CardPriceData }
@@ -166,8 +169,9 @@ const clampQuantity = (value: number) => Math.max(1, Math.min(MAX_QUANTITY, Math
 function withPrice<T extends { prices: CardPriceData | null; referencePrice: number | null; lastPriceUpdate: string | null }>(
   item: T,
   price: CardPriceData | null,
+  condition: CardCondition = "NM",
 ): T {
-  return { ...item, prices: price, referencePrice: calculateReferencePrice(price), lastPriceUpdate: price?.updatedAt ?? null };
+  return { ...item, prices: price, referencePrice: applyCondition(calculateReferencePrice(price), condition), lastPriceUpdate: price?.updatedAt ?? null };
 }
 
 /** Retire les emplacements en trop quand la quantité d'une carte baisse (les derniers positions d'abord). */
@@ -192,13 +196,14 @@ export function reduce(state: AppState, action: Action): AppState {
         ? state.collection.map((item) => {
             if (item.id !== existing.id) return item;
             const bumped = { ...item, quantity: Math.min(MAX_QUANTITY, item.quantity + 1) };
-            return item.prices ? bumped : withPrice(bumped, action.price);
+            return item.prices ? bumped : withPrice(bumped, action.price, item.condition);
           })
         : [
             ...state.collection,
             withPrice(
-              { ...card, language: "FR" as const, condition: "NM" as const, quantity: 1, prices: null, referencePrice: null, lastPriceUpdate: null, purchasePrice: null, addedAt: new Date().toISOString() },
+              { ...card, language: "FR" as const, condition: action.condition ?? "NM", quantity: 1, prices: null, referencePrice: null, lastPriceUpdate: null, purchasePrice: null, addedAt: new Date().toISOString() },
               action.price,
+              action.condition ?? "NM",
             ),
           ];
       let next: AppState = { ...state, collection };
@@ -225,6 +230,16 @@ export function reduce(state: AppState, action: Action): AppState {
       return { ...state, collection, placements };
     }
 
+    case "collection/condition":
+      return {
+        ...state,
+        collection: state.collection.map((item) =>
+          item.id === action.id
+            ? { ...item, condition: action.condition, referencePrice: applyCondition(calculateReferencePrice(item.prices), action.condition) }
+            : item,
+        ),
+      };
+
     case "collection/remove":
       return {
         ...state,
@@ -240,7 +255,7 @@ export function reduce(state: AppState, action: Action): AppState {
 
     case "price/set":
       return action.kind === "collection"
-        ? { ...state, collection: state.collection.map((item) => (item.id === action.id ? withPrice(item, action.price) : item)) }
+        ? { ...state, collection: state.collection.map((item) => (item.id === action.id ? withPrice(item, action.price, item.condition) : item)) }
         : { ...state, wishlist: state.wishlist.map((item) => (item.id === action.id ? withPrice(item, action.price) : item)) };
 
     case "binder/place": {
