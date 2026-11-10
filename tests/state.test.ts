@@ -192,7 +192,7 @@ describe("recherchées et scellés", () => {
   });
 
   it("calcule valeur, coût et plus-value des scellés", () => {
-    const base = { setId: null, setName: null, image: null, status: "owned" as const, priceUpdatedAt: null, note: "", addedAt: "2026-01-01" };
+    const base = { setId: null, setName: null, image: null, status: "owned" as const, priceUpdatedAt: null, note: "", addedAt: "2026-01-01", productId: null };
     const totals = calculateSealedTotals([
       { ...base, id: "a", name: "Display", type: "display", quantity: 2, purchasePrice: 100, marketPrice: 140 },
       { ...base, id: "b", name: "ETB", type: "etb", quantity: 1, purchasePrice: 50, marketPrice: null },

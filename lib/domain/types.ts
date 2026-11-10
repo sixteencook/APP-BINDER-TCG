@@ -55,7 +55,6 @@ export interface WishItem extends Card {
 export type SealedType =
   | "display"
   | "etb"
-  | "etb-pc"
   | "upc"
   | "coffret"
   | "bundle"
@@ -71,14 +70,16 @@ export interface SealedItem {
   type: SealedType;
   setId: string | null;
   setName: string | null;
-  /** Logo de l'extension (TCGdex) ou null. */
+  /** Image du produit (TCGGO) ou logo de l'extension (TCGdex), sinon null. */
   image: string | null;
   status: SealedStatus;
   quantity: number;
   /** Prix d'achat unitaire (produits possédés). */
   purchasePrice: number | null;
-  /** Prix de marché saisi à la main : aucune source de prix scellé n'est branchée. */
+  /** Prix de marché : actualisé via TCGGO quand `productId` est renseigné, sinon saisi à la main. */
   marketPrice: number | null;
+  /** Identifiant produit TCGGO — permet l'actualisation automatique du prix. */
+  productId: number | null;
   priceUpdatedAt: string | null;
   note: string;
   addedAt: string;
@@ -124,6 +125,20 @@ export interface CardPriceProvider {
 
 export interface CardCatalogProvider {
   search(query: string): Promise<Card[]>;
+}
+
+/** Produit scellé renvoyé par la recherche TCGGO (prix Cardmarket inclus). */
+export interface SealedProductHit {
+  productId: number;
+  name: string;
+  image: string | null;
+  setName: string | null;
+  /** Prix retenu : moyenne 7 j, sinon 30 j, sinon le plus bas. */
+  price: number | null;
+  lowest: number | null;
+  avg7: number | null;
+  avg30: number | null;
+  updatedAt: string;
 }
 
 export interface SetSummary {

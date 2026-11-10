@@ -140,6 +140,7 @@ export type Action =
   | { type: "wish/target"; id: string; value: number | null }
   | { type: "wish/acquire"; id: string }
   | { type: "sealed/upsert"; item: SealedItem }
+  | { type: "sealed/price"; id: string; value: number | null; updatedAt: string }
   | { type: "sealed/remove"; id: string }
   | { type: "sealed/acquire"; id: string }
   | { type: "settings/prices"; value: boolean };
@@ -370,6 +371,14 @@ export function reduce(state: AppState, action: Action): AppState {
       const exists = state.sealed.some((candidate) => candidate.id === item.id);
       return { ...state, sealed: exists ? state.sealed.map((candidate) => (candidate.id === item.id ? item : candidate)) : [item, ...state.sealed] };
     }
+
+    case "sealed/price":
+      return {
+        ...state,
+        sealed: state.sealed.map((item) =>
+          item.id === action.id ? { ...item, marketPrice: action.value, priceUpdatedAt: action.updatedAt } : item,
+        ),
+      };
 
     case "sealed/remove":
       return { ...state, sealed: state.sealed.filter((item) => item.id !== action.id) };

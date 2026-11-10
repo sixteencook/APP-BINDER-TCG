@@ -149,7 +149,13 @@ export function sanitizeState(raw: unknown): AppState | null {
     const name = str(entry.name, 120);
     if (!id || !name || sealedIds.has(id)) continue;
     sealedIds.add(id);
-    const type = SEALED_TYPES.find((t) => t.id === entry.type)?.id ?? "autre";
+    // « etb-pc » (ancien type, retiré) est migré vers « etb ».
+    const rawType = entry.type === "etb-pc" ? "etb" : entry.type;
+    const type = SEALED_TYPES.find((t) => t.id === rawType)?.id ?? "autre";
+    const productId = (() => {
+      const n = num(entry.productId);
+      return n !== null && Number.isInteger(n) && n > 0 ? n : null;
+    })();
     sealed.push({
       id,
       name,
@@ -161,6 +167,7 @@ export function sanitizeState(raw: unknown): AppState | null {
       quantity: clamp(entry.quantity, 1, MAX_QUANTITY, 1),
       purchasePrice: money(entry.purchasePrice),
       marketPrice: money(entry.marketPrice),
+      productId,
       priceUpdatedAt: str(entry.priceUpdatedAt, 40),
       note: typeof entry.note === "string" ? entry.note.slice(0, 500) : "",
       addedAt: str(entry.addedAt, 40) ?? new Date(0).toISOString(),

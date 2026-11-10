@@ -3,7 +3,6 @@ import type { SealedType } from "./types";
 export const SEALED_TYPES: { id: SealedType; label: string; short: string }[] = [
   { id: "display", label: "Display (36 boosters)", short: "Display" },
   { id: "etb", label: "ETB (Coffret Dresseur d’élite)", short: "ETB" },
-  { id: "etb-pc", label: "ETB Pokémon Center", short: "ETB PC" },
   { id: "upc", label: "Collection Ultra-Premium", short: "UPC" },
   { id: "coffret", label: "Coffret / Collection", short: "Coffret" },
   { id: "bundle", label: "Bundle (6 boosters)", short: "Bundle" },
@@ -17,10 +16,23 @@ export function sealedTypeLabel(type: SealedType, short = false): string {
   return found ? (short ? found.short : found.label) : type;
 }
 
-/** Nom proposé par défaut : « ETB Pokémon Center · Évolutions Prismatiques ». */
+/** Nom proposé par défaut : « ETB · Évolutions Prismatiques ». */
 export function defaultSealedName(type: SealedType, setName: string | null): string {
   const base = sealedTypeLabel(type, true);
   return setName ? `${base} · ${setName}` : base;
+}
+
+/** Devine le type d'un produit TCGGO à partir de son nom (anglais le plus souvent). */
+export function guessSealedType(name: string): SealedType {
+  const n = name.toLowerCase();
+  if (/(booster box|display)/.test(n)) return "display";
+  if (/(elite trainer box|\betb\b)/.test(n)) return "etb";
+  if (/ultra.?premium/.test(n)) return "upc";
+  if (/bundle/.test(n)) return "bundle";
+  if (/(tri.?pack|3.?pack|three booster)/.test(n)) return "tripack";
+  if (/(sleeved booster|booster pack|\bbooster\b)/.test(n)) return "booster";
+  if (/(collection|box|tin|coffret|premium)/.test(n)) return "coffret";
+  return "autre";
 }
 
 /** Lien de recherche Cardmarket (simple lien sortant, aucune donnée récupérée). */
