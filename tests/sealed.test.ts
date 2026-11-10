@@ -4,7 +4,7 @@ import { mapTcggoProduct } from "@/lib/pricing/tcggo-products";
 import { sanitizeState } from "@/lib/storage/binder-storage";
 
 describe("produits scellés TCGGO", () => {
-  it("mappe un produit (image, extension, prix 7 j prioritaire)", () => {
+  it("mappe un produit (image, extension, prix le plus bas prioritaire)", () => {
     const hit = mapTcggoProduct({
       id: 51261,
       name: "Delta Reign Sleeved Booster",
@@ -17,15 +17,17 @@ describe("produits scellés TCGGO", () => {
       name: "Delta Reign Sleeved Booster",
       image: "https://images.tcggo.com/x.png",
       setName: "Delta Reign",
-      price: 7.48,
+      price: 6.99,
       lowest: 6.99,
       avg30: 7.58,
     });
   });
 
   it("retombe sur 30 j puis le plus bas, et rejette les produits invalides", () => {
-    expect(mapTcggoProduct({ id: 2, name: "ETB", prices: { cardmarket: { lowest: 40, "30d_average": 45 } } })?.price).toBe(45);
-    expect(mapTcggoProduct({ id: 3, name: "ETB", prices: { cardmarket: { lowest: 40 } } })?.price).toBe(40);
+    expect(mapTcggoProduct({ id: 2, name: "ETB", prices: { cardmarket: { lowest: null, "30d_average": 45 } } })?.price).toBe(45);
+    expect(mapTcggoProduct({ id: 3, name: "ETB", prices: { cardmarket: { lowest: null, "7d_average": 41, "30d_average": 45 } } })?.price).toBe(41);
+    // moyenne 7 j aberrante (peu de ventes) : le plus bas en vente l'emporte
+    expect(mapTcggoProduct({ id: 5, name: "ETB PC", prices: { cardmarket: { lowest: 130, "7d_average": 399 } } })?.price).toBe(130);
     expect(mapTcggoProduct({ name: "sans id" })).toBeNull();
     expect(mapTcggoProduct({ id: 4, name: "http image", image: "http://insecure.png" })?.image).toBeNull();
   });

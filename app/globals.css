@@ -233,7 +233,7 @@ input::placeholder, textarea::placeholder { color: #667394; }
 .product-hits .hit-text { display: grid; gap: 1px; min-width: 0; flex: 1; }
 .product-hits .hit-text strong { font-size: 0.86rem; line-height: 1.25; }
 .product-hits .hit-text small { font-size: 0.74rem; }
-.product-hits .hit-price { font-weight: 800; font-size: 0.86rem; color: var(--accent); flex: none; }
+.product-hits .hit-price { display: grid; justify-items: end; font-weight: 800; font-size: 0.86rem; color: var(--accent); flex: none; }
 .link-btn { padding: 0; border: 0; background: none; color: var(--accent); font: inherit; font-weight: 700; cursor: pointer; text-decoration: underline; }
 .link-btn:disabled { opacity: 0.6; cursor: wait; }
 
@@ -313,3 +313,5 @@ input::placeholder, textarea::placeholder { color: #667394; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
 }
+
+.product-hits .hit-price small { font-weight: 600; font-size: 0.7rem; }

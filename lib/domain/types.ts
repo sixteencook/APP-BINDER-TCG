@@ -133,7 +133,7 @@ export interface SealedProductHit {
   name: string;
   image: string | null;
   setName: string | null;
-  /** Prix retenu : moyenne 7 j, sinon 30 j, sinon le plus bas. */
+  /** Prix retenu : le plus bas en vente, sinon moyenne 7 j, sinon 30 j. */
   price: number | null;
   lowest: number | null;
   avg7: number | null;

@@ -256,7 +256,10 @@ function ProductSearch({ onPick }: { onPick: (hit: SealedProductHit) => void }) 
                   <strong>{hit.name}</strong>
                   {hit.setName && <small className="muted">{hit.setName}</small>}
                 </span>
-                <span className="hit-price">{money(hit.price)}</span>
+                <span className="hit-price">
+                  {money(hit.price)}
+                  {hit.avg7 !== null && hit.avg7 !== hit.price && <small className="muted">moy. 7 j {money(hit.avg7)}</small>}
+                </span>
               </button>
             </li>
           ))}

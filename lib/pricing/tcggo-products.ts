@@ -38,7 +38,8 @@ export function mapTcggoProduct(product: TcggoProduct, updatedAt = new Date().to
     name: String(product.name).slice(0, 120),
     image: typeof product.image === "string" && product.image.startsWith("https://") ? product.image : null,
     setName: typeof product.episode?.name === "string" ? product.episode.name.slice(0, 120) : null,
-    price: avg7 ?? avg30 ?? lowest,
+    // Le plus bas en vente = prix réellement payable ; les moyennes 7/30 j sont faussées sur les produits rares (2-3 ventes).
+    price: lowest ?? avg7 ?? avg30,
     lowest,
     avg7,
     avg30,
