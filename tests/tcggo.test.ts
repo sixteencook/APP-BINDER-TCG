@@ -5,6 +5,12 @@ describe("mapping TCGGO", () => {
   it("normalise l'identifiant TCGdex pour la recherche TCGGO", () => {
     expect(toTcggoId("sv01-210")).toBe("sv1-210");
     expect(toTcggoId("sv08-219")).toBe("sv8-219");
+    expect(toTcggoId("swsh12.5gg-GG55")).toBe("swsh12pt5gg-gg55");
+  });
+  it("conserve l'image TCGGO comme fallback sûr", () => {
+    expect(mapTcggoPrice({ image: "https://images.tcggo.com/regigigas.png" }).fallbackImage)
+      .toBe("https://images.tcggo.com/regigigas.png");
+    expect(mapTcggoPrice({ image: "http://example.test/card.png" }).fallbackImage).toBeNull();
   });
   it("mappe uniquement les métriques Cardmarket garanties", () => {
     const mapped = mapTcggoPrice({ id: 21007, prices: { cardmarket: {

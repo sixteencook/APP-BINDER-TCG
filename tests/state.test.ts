@@ -27,7 +27,7 @@ const card = (n: number, extensionId = "sv01"): Card => ({
 
 const price = (trend: number): CardPriceData => ({
   currency: "EUR", language: "FR", condition: "NM", lowest: trend - 1, trend, avg7: null, avg30: null,
-  updatedAt: "2026-11-10T08:00:00.000Z", source: "TCGGO / Cardmarket", providerProductId: "1",
+  updatedAt: "2026-11-10T08:00:00.000Z", source: "TCGGO / Cardmarket", providerProductId: "1", fallbackImage: null,
 });
 
 const run = (state: AppState, ...actions: Parameters<typeof reduce>[1][]) => actions.reduce(reduce, state);

@@ -40,6 +40,7 @@ function parsePrice(value: unknown): CardPriceData | null {
     updatedAt: value.updatedAt,
     source: "TCGGO / Cardmarket",
     providerProductId: str(value.providerProductId, 60),
+    fallbackImage: url(value.fallbackImage),
   };
 }
 

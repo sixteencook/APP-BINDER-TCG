@@ -5,7 +5,7 @@ import { calculateBinderTotal, calculateReferencePrice } from "@/lib/domain/valu
 const price = (values: Partial<CardPriceData>): CardPriceData => ({
   currency: "EUR", language: "FR", condition: "NM", lowest: null, trend: null,
   avg7: null, avg30: null, updatedAt: "2026-09-13T00:00:00.000Z",
-  source: "TCGGO / Cardmarket", providerProductId: "42", ...values,
+  source: "TCGGO / Cardmarket", providerProductId: "42", fallbackImage: null, ...values,
 });
 
 const item = (referencePrice: number | null, quantity = 1): BinderItem => ({

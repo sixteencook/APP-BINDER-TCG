@@ -25,6 +25,8 @@ export interface CardPriceData {
   updatedAt: string;
   source: "TCGGO / Cardmarket";
   providerProductId: string | null;
+  /** Image fournie par le provider de prix lorsque le catalogue n'en possède pas. */
+  fallbackImage: string | null;
 }
 
 /** Une carte de la collection (stock). Les emplacements dans les binders sont dans `Placement`. */

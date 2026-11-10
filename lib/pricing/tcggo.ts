@@ -8,6 +8,7 @@ type TcggoCard = {
   name?: string;
   card_number?: number | string;
   tcgid?: string;
+  image?: string | null;
   episode?: { name?: string; code?: string };
   prices?: {
     cardmarket?: {
@@ -33,7 +34,10 @@ function normalizeId(value: string) {
 }
 
 export function toTcggoId(catalogId: string) {
-  return catalogId.toLowerCase().replace(/^([a-z]+)0+(\d+)/, "$1$2");
+  return catalogId
+    .toLowerCase()
+    .replace(/^([a-z]+)0+(\d+)/, "$1$2")
+    .replace(/\.(\d+)/g, "pt$1");
 }
 
 export function mapTcggoPrice(card: TcggoCard, updatedAt = new Date().toISOString()): CardPriceData {
@@ -49,6 +53,7 @@ export function mapTcggoPrice(card: TcggoCard, updatedAt = new Date().toISOStrin
     updatedAt,
     source: "TCGGO / Cardmarket",
     providerProductId: card.id === undefined ? null : String(card.id),
+    fallbackImage: typeof card.image === "string" && card.image.startsWith("https://") ? card.image : null,
   };
 }
 

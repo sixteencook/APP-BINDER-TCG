@@ -145,7 +145,7 @@ function CardDetailSheet({ card, onClose }: { card: Card; onClose: () => void })
   return (
     <Sheet open onClose={onClose} title={card.name}>
       <div className="detail-layout">
-        <CardImage card={card} size="full" className="detail-img" />
+        <CardImage card={card} size="full" className="detail-img" fallbackImage={price?.fallbackImage} />
         <div className="detail-info">
           <p className="eyebrow">{card.extension}</p>
           <p className="detail-number">

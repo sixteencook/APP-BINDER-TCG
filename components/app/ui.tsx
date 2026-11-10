@@ -5,13 +5,17 @@ import type { ReactNode } from "react";
 import { Minus, Plus, X } from "lucide-react";
 import type { Card, CardPriceData } from "@/lib/domain/types";
 import { calculateReferencePrice } from "@/lib/domain/valuation";
-import { money, moneyTag, thumbnail } from "@/lib/format";
+import { imageSources } from "@/lib/images";
+import { money, moneyTag } from "@/lib/format";
 
 /* eslint-disable @next/next/no-img-element -- images TCGdex dynamiques, déjà en WebP */
-export function CardImage({ card, size = "thumb", className = "" }: { card: Pick<Card, "name" | "localId" | "image">; size?: "thumb" | "full"; className?: string }) {
-  const src = size === "thumb" ? thumbnail(card.image) : card.image;
-  const [failedSrc, setFailedSrc] = useState<string | null>(null);
-  if (!src || failedSrc === src) {
+type ImageCard = Pick<Card, "name" | "localId" | "image" | "extensionId"> & { prices?: CardPriceData | null };
+
+/** Image de carte avec chaîne de secours : TCGdex → image du fournisseur de prix → CDN Pokémon TCG. */
+export function CardImage({ card, size = "thumb", className = "", fallbackImage }: { card: ImageCard; size?: "thumb" | "full"; className?: string; fallbackImage?: string | null }) {
+  const [failed, setFailed] = useState<string[]>([]);
+  const source = imageSources(card, size, fallbackImage ?? card.prices?.fallbackImage).find((candidate) => !failed.includes(candidate));
+  if (!source) {
     return (
       <div className={`img-missing ${className}`} role="img" aria-label={`${card.name}, image indisponible`}>
         <span>{card.name}</span>
@@ -22,12 +26,12 @@ export function CardImage({ card, size = "thumb", className = "" }: { card: Pick
   return (
     <img
       className={`card-img ${className}`}
-      src={src}
+      src={source}
       alt={`${card.name} ${card.localId}`}
       loading="lazy"
       decoding="async"
       draggable={false}
-      onError={() => setFailedSrc(src)}
+      onError={() => setFailed((list) => [...list, source])}
     />
   );
 }

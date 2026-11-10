@@ -1,6 +1,6 @@
 // Service worker TCG Binder v2
 // - pages et scripts : réseau d'abord (toujours la dernière version), cache en secours hors ligne
-// - images des cartes (TCGdex) : cache d'abord, pour que le binder reste visible sans réseau
+// - images des cartes (TCGdex et sources de secours) : cache d'abord, pour que le binder reste visible sans réseau
 // - /api/* : jamais mis en cache ici (les prix ont leur propre cache applicatif)
 const SHELL = "tcg-binder-shell-v2";
 const IMAGES = "tcg-binder-images-v2";
@@ -30,7 +30,8 @@ self.addEventListener("fetch", (event) => {
   if (request.method !== "GET") return;
   const url = new URL(request.url);
 
-  if (url.hostname === "assets.tcgdex.net") {
+  // Images de cartes (TCGdex, TCGGO, CDN Pokémon TCG…) : toute image tierce est servie cache d'abord.
+  if (request.destination === "image" && url.origin !== self.location.origin) {
     event.respondWith(
       caches.open(IMAGES).then(async (cache) => {
         const hit = await cache.match(request);
