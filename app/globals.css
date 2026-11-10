@@ -226,7 +226,7 @@ input::placeholder, textarea::placeholder { color: #667394; }
 .sealed-fallback { display: grid; justify-items: center; gap: 4px; color: var(--muted); font-weight: 800; font-size: 0.8rem; }
 
 /* Résultats de recherche produit TCGGO (formulaire scellé) */
-.product-hits { display: grid; gap: 6px; margin: 8px 0 0; padding: 0; list-style: none; }
+.product-hits { display: grid; gap: 6px; margin: 8px 0 0; padding: 0 4px 0 0; list-style: none; max-height: 340px; overflow-y: auto; }
 .product-hits button { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel, #121a30); color: inherit; text-align: left; cursor: pointer; }
 .product-hits button:hover { outline: 2px solid var(--accent); }
 .product-hits img { width: 42px; height: 42px; object-fit: contain; flex: none; }

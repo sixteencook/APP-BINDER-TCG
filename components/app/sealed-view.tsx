@@ -221,7 +221,7 @@ function ProductSearch({ onPick }: { onPick: (hit: SealedProductHit) => void }) 
         const response = await fetch(`/api/products/search?q=${encodeURIComponent(trimmed)}`, { signal: abort.signal });
         const payload = (await response.json().catch(() => null)) as { products?: SealedProductHit[]; error?: string } | null;
         if (!response.ok || !payload?.products) throw new Error(payload?.error ?? "Recherche impossible.");
-        setHits(payload.products.slice(0, 8));
+        setHits(payload.products.slice(0, 20));
       } catch (searchError) {
         if (abort.signal.aborted) return;
         setHits(null);
